@@ -60,6 +60,7 @@ static bool emergencyStop = false;
 static int emergencyStopTimeout = EMERGENCY_STOP_TIMEOUT_DISABLED;
 
 static bool checkStops;
+static float batVoltage = 0.0f;
 
 #define PROPTEST_NBR_OF_VARIANCE_VALUES   100
 static bool startPropTest = false;
@@ -268,6 +269,7 @@ static void stabilizerTask(void* param)
   while(1) {
     // The sensor should unlock at 1kHz
     sensorsWaitDataReady();
+    batVoltage = pmGetBatteryVoltage();
 
     if (startPropTest != false) {
       // TODO: What happens with estimator when we run tests after startup?
@@ -614,6 +616,8 @@ LOG_ADD(LOG_FLOAT, roll, &state.attitude.roll)
 LOG_ADD(LOG_FLOAT, pitch, &state.attitude.pitch)
 LOG_ADD(LOG_FLOAT, yaw, &state.attitude.yaw)
 LOG_ADD(LOG_FLOAT, thrust, &control.thrust)
+LOG_ADD(LOG_UINT8, stop, &emergencyStop)
+LOG_ADD(LOG_FLOAT, vbat, &batVoltage)
 
 STATS_CNT_RATE_LOG_ADD(rtStab, &stabilizerRate)
 LOG_ADD(LOG_UINT32, intToOut, &inToOutLatency)

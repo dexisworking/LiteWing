@@ -35,6 +35,7 @@
 
 #include "cf_math.h"
 #include "param.h"
+#include "log.h"
 #include "stm32_legacy.h"
 #include "static_mem.h"
 
@@ -46,6 +47,8 @@ const static int priorityDisable = COMMANDER_PRIORITY_DISABLE;
 
 static uint32_t lastUpdate;
 static bool enableHighLevel = false;
+static uint32_t commanderInactivityMs = 0;
+static uint8_t commanderActivePriority = 0;
 
 static QueueHandle_t setpointQueue;
 STATIC_MEM_QUEUE_ALLOC(setpointQueue, 1, sizeof(setpoint_t));
@@ -106,6 +109,8 @@ void commanderGetSetpoint(setpoint_t *setpoint, const state_t *state)
   xQueuePeek(setpointQueue, setpoint, 0);
   lastUpdate = setpoint->timestamp;
   uint32_t currentTime = xTaskGetTickCount();
+  commanderInactivityMs = (currentTime >= setpoint->timestamp) ? (currentTime - setpoint->timestamp) : 0;
+  commanderActivePriority = (uint8_t)commanderGetActivePriority();
 
   if ((currentTime - setpoint->timestamp) > COMMANDER_WDT_TIMEOUT_SHUTDOWN) {
     if (enableHighLevel) {
@@ -156,3 +161,8 @@ int commanderGetActivePriority(void)
 PARAM_GROUP_START(commander)
 PARAM_ADD(PARAM_UINT8, enHighLevel, &enableHighLevel)
 PARAM_GROUP_STOP(commander)
+
+LOG_GROUP_START(commander)
+LOG_ADD(LOG_UINT32, inactivity, &commanderInactivityMs)
+LOG_ADD(LOG_UINT8, priority, &commanderActivePriority)
+LOG_GROUP_STOP(commander)

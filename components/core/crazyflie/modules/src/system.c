@@ -42,6 +42,7 @@
 #include "config.h"
 #include "system.h"
 #include "platform.h"
+#include "esp_system.h"
 //#include "storage.h"
 #include "configblock.h"
 #include "worker.h"
@@ -85,6 +86,7 @@ static bool canFly;
 static bool armed = ARM_INIT;
 static bool forceArm;
 static bool isInit;
+static uint8_t resetReason = 0;
 
 STATIC_MEM_TASK_ALLOC(systemTask, SYSTEM_TASK_STACKSIZE);
 
@@ -112,6 +114,9 @@ void systemInit(void)
 
   canStartMutex = xSemaphoreCreateMutexStatic(&canStartMutexBuffer);
   xSemaphoreTake(canStartMutex, portMAX_DELAY);
+
+  resetReason = (uint8_t)esp_reset_reason();
+  DEBUG_PRINTI("ESP reset reason: %d\n", (int)resetReason);
 
   wifilinkInit();
   sysLoadInit();
@@ -350,4 +355,6 @@ PARAM_GROUP_STOP(sytem)
 LOG_GROUP_START(sys)
 LOG_ADD(LOG_INT8, canfly, &canFly)
 LOG_ADD(LOG_INT8, armed, &armed)
+LOG_ADD(LOG_INT8, forceArm, &forceArm)
+LOG_ADD(LOG_UINT8, rstReason, &resetReason)
 LOG_GROUP_STOP(sys)
