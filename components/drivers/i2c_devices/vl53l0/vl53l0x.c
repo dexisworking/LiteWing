@@ -99,29 +99,21 @@ static bool vl53l0xWriteReg32Bit(VL53L0xDev *dev, uint8_t reg, uint32_t val);
 
 bool vl53l0xInit(VL53L0xDev *dev, I2C_Dev *I2Cx, bool io_2V8)
 {
-    // dev->I2Cx = I2Cx;
-    // dev->devAddr = VL53L0X_DEFAULT_ADDRESS;
-    // i2cdevInit(dev->I2Cx);
+    dev->I2Cx = I2Cx;
+    dev->devAddr = VL53L0X_DEFAULT_ADDRESS;
+    i2cdevInit(dev->I2Cx);
 
-    // dev->io_timeout = 0;
-    // dev->did_timeout = 0;
-    // dev->timeout_start_ms = 0;
-    // dev->stop_variable = 0;
-    // dev->measurement_timing_budget_us = 0;
-    // dev->measurement_timing_budget_ms = 0;
+    dev->io_timeout = 50;
+    dev->did_timeout = 0;
+    dev->timeout_start_ms = 0;
+    dev->stop_variable = 0;
+    dev->measurement_timing_budget_us = 33000;
+    dev->measurement_timing_budget_ms = 33;
 
     if (!vl53l0xInitSensor(dev, io_2V8)) {
         return false;
     }
 
-    /* Move initialized sensor to a new I2C address */
-    //int newAddress;
-
-    // taskENTER_CRITICAL();
-    // newAddress = nextI2CAddress++;
-    // taskEXIT_CRITICAL();
-
-    //return vl53l0xSetI2CAddress(dev, newAddress);
     return true;
 }
 

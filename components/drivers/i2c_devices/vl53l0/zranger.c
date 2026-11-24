@@ -106,14 +106,23 @@ int16_t zRangerMeasurementAndRestart()
 
 static int16_t zRangerGetMeasurementAndRestart(VL53L0xDev *dev)
 {
+	int16_t range = -1;
+	int timeout = 10; /* Max 10 * 10ms = 100ms timeout to prevent hanging */
 
-	int16_t range;
-	while (dataready == 0)
+	while (timeout > 0)
 	{
-		vTaskDelay(M2T(20));
+		int16_t res = zRangerMeasurementAndRestart();
+		if (res == 0 && dataready != 0)
+		{
+			range = range1;
+			dataready = 0;
+			break;
+		}
+		vTaskDelay(M2T(10));
+		timeout--;
 	}
-	dataready = 0;
-	return range = range1;
+
+	return range;
 }
 
 void zRangerInit(void)
@@ -121,26 +130,28 @@ void zRangerInit(void)
   if (isInit)
     return;
 
-  dev.I2Cx = 0;
+  dev.I2Cx = I2C1_DEV;
   dev.devAddr = VL53L0X_DEFAULT_ADDRESS;
   i2cdevInit(dev.I2Cx);
 
-  dev.io_timeout = 0;
+  dev.io_timeout = 50;
   dev.did_timeout = 0;
   dev.timeout_start_ms = 0;
   dev.stop_variable = 0;
-  dev.measurement_timing_budget_us = 0;
-  dev.measurement_timing_budget_ms = 0;
+  dev.measurement_timing_budget_us = 33000;
+  dev.measurement_timing_budget_ms = 33;
 
   vTaskDelay(M2T(20));
 
   uint16_t wordData;
   wordData = vl53l0xGetModelID(&dev);
-  DEBUG_PRINTI( "VL53L0X: %02X\n\r", wordData);
+  DEBUG_PRINTI( "VL53L0X Model ID: 0x%04X\n", wordData);
 
-  if(wordData == VL53L0X_ID)
-	{
-    DEBUG_PRINT( "VL53L0X I2C commection [OK].\n");
+  if (wordData == VL53L0X_ID)
+  {
+    DEBUG_PRINTI("VL53L0X I2C connection [OK].\n");
+  } else {
+    DEBUG_PRINTW("VL53L0X unexpected ID: 0x%04X (expected 0x%04X)\n", wordData, VL53L0X_ID);
   }
 
   vl53l0xInit(&dev, I2C1_DEV, true);
@@ -177,16 +188,13 @@ void zRangerTask(void* arg)
   xLastWakeTime = xTaskGetTickCount();
 
   while (1) {
-    vTaskDelayUntil(&xLastWakeTime, M2T(dev.measurement_timing_budget_ms));
+    uint32_t delayMs = (dev.measurement_timing_budget_ms >= 20) ? dev.measurement_timing_budget_ms : 33;
+    vTaskDelayUntil(&xLastWakeTime, M2T(delayMs));
 
     range_last = zRangerGetMeasurementAndRestart(&dev);
-    rangeSet(rangeDown, range_last / 1000.0f);
-    DEBUG_PRINTD("ZRANGE = %f",range_last/ 1000.0f);
 
-    // check if range is feasible and push into the estimator
-    // the sensor should not be able to measure >3 [m], and outliers typically
-    // occur as >8 [m] measurements
-    if (range_last < RANGE_OUTLIER_LIMIT) {
+    if (range_last > 20 && range_last < RANGE_OUTLIER_LIMIT) {
+      rangeSet(rangeDown, range_last / 1000.0f);
       float distance = (float)range_last * 0.001f; // Scale from [mm] to [m]
       float stdDev = expStdA * (1.0f  + expf( expCoeff * (distance - expPointA)));
       rangeEnqueueDownRangeInEstimator(distance, stdDev, xTaskGetTickCount());
