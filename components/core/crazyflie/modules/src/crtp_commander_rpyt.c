@@ -34,6 +34,7 @@
 #include "param.h"
 #include "FreeRTOS.h"
 #include "num.h"
+#include "control_mux.h"
 #include "stm32_legacy.h"
 #define DEBUG_MODULE "MODE"
 #include "debug_cf.h"
@@ -257,6 +258,8 @@ void crtpCommanderRpytDecodeSetpoint(setpoint_t *setpoint, CRTPPacket *pk)
       setpoint->attitude.yaw = values->yaw;
     }
   }
+
+  controlMuxNotifyAppSetpoint(setpoint);
 }
 
 // Params for flight modes

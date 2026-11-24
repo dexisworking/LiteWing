@@ -44,6 +44,7 @@
 #include "platform.h"
 #include "esp_system.h"
 #include "crash_manager.h"
+#include "glove_udp.h"
 //#include "storage.h"
 #include "configblock.h"
 #include "worker.h"
@@ -148,6 +149,7 @@ void systemInit(void)
   pmInit();
   buzzerInit();
   crashManagerInit();
+  gloveUdpInit();
 //  peerLocalizationInit();
 
 #ifdef APP_ENABLED

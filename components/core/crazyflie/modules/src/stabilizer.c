@@ -39,6 +39,7 @@
 #include "esp_timer.h"
 #include "stabilizer.h"
 #include "crash_manager.h"
+#include "control_mux.h"
 #include "sensors.h"
 #include "commander.h"
 #include "crtp_localization_service.h"
@@ -295,6 +296,8 @@ static void stabilizerTask(void* param)
 
       stateEstimator(&state, &sensorData, &control, tick);
       compressState();
+
+      controlMuxUpdate();
 
       commanderGetSetpoint(&setpoint, &state);
       compressSetpoint();
