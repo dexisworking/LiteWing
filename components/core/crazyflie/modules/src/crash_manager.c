@@ -19,6 +19,7 @@
 #include "attitude_controller.h"
 #include "system.h"
 #include "pm_esplane.h"
+#include "power_distribution.h"
 #include "log.h"
 #include "param.h"
 

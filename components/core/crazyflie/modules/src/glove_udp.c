@@ -40,7 +40,7 @@ static void gloveUdpServerTask(void *pvParameters)
     dest_addr.sin_port = htons(GLOVE_UDP_PORT);
 
     /* Wait a moment for Wi-Fi stack to be ready */
-    vTaskDelay(M2T(1500));
+    vTaskDelay(pdMS_TO_TICKS(1500));
 
     gloveSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (gloveSock < 0) {
@@ -69,7 +69,7 @@ static void gloveUdpServerTask(void *pvParameters)
                            (struct sockaddr *)&source_addr, &socklen);
 
         if (len < 0) {
-            vTaskDelay(M2T(10));
+            vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
 

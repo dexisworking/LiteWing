@@ -87,12 +87,12 @@ controlOwner_t controlMuxGetOwner(void)
 
 bool controlMuxIsAppActive(void)
 {
-    return ((xTaskGetTickCount() - lastAppPacketTick) < M2T(APP_ACTIVITY_TIMEOUT_MS));
+    return ((xTaskGetTickCount() - lastAppPacketTick) < pdMS_TO_TICKS(APP_ACTIVITY_TIMEOUT_MS));
 }
 
 bool controlMuxIsGloveActive(void)
 {
-    return (hasGlovePacket && ((xTaskGetTickCount() - lastGlovePacketTick) < M2T(GLOVE_ACTIVITY_TIMEOUT_MS)));
+    return (hasGlovePacket && ((xTaskGetTickCount() - lastGlovePacketTick) < pdMS_TO_TICKS(GLOVE_ACTIVITY_TIMEOUT_MS)));
 }
 
 void controlMuxUpdate(void)
@@ -102,8 +102,8 @@ void controlMuxUpdate(void)
     }
 
     uint32_t now = xTaskGetTickCount();
-    bool appActive = (lastAppPacketTick > 0) && ((now - lastAppPacketTick) < M2T(APP_ACTIVITY_TIMEOUT_MS));
-    bool gloveActive = hasGlovePacket && ((now - lastGlovePacketTick) < M2T(GLOVE_ACTIVITY_TIMEOUT_MS));
+    bool appActive = (lastAppPacketTick > 0) && ((now - lastAppPacketTick) < pdMS_TO_TICKS(APP_ACTIVITY_TIMEOUT_MS));
+    bool gloveActive = hasGlovePacket && ((now - lastGlovePacketTick) < pdMS_TO_TICKS(GLOVE_ACTIVITY_TIMEOUT_MS));
 
     appActiveStatus = appActive ? 1 : 0;
     gloveActiveStatus = gloveActive ? 1 : 0;
