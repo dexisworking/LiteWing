@@ -33,6 +33,7 @@
 #include "stabilizer_types.h"
 
 void sitAwInit(void);
+void sitAwReset(void);
 void sitAwUpdateSetpoint(setpoint_t *setpoint, const sensorData_t *sensorData,
                                                const state_t *state);
 /* Enable the situation awareness framework. */

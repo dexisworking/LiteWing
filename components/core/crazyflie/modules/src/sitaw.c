@@ -345,3 +345,16 @@ void sitAwInit(void)
   sitAwTuInit();
 #endif
 }
+
+void sitAwReset(void)
+{
+#ifdef SITAW_TU_ENABLED
+  triggerReset(&sitAwTuAcc);
+#endif
+#ifdef SITAW_FF_ENABLED
+  triggerReset(&sitAwFFAccWZ);
+#endif
+#ifdef SITAW_AR_ENABLED
+  triggerReset(&sitAwARAccZ);
+#endif
+}

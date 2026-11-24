@@ -65,4 +65,9 @@ void stabilizerResetEmergencyStop();
 void stabilizerSetEmergencyStopTimeout(int timeout);
 
 
+/**
+ * Check if emergency stop is currently active.
+ */
+bool stabilizerIsEmergencyStop(void);
+
 #endif /* STABILIZER_H_ */

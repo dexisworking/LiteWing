@@ -43,6 +43,7 @@
 #include "system.h"
 #include "platform.h"
 #include "esp_system.h"
+#include "crash_manager.h"
 //#include "storage.h"
 #include "configblock.h"
 #include "worker.h"
@@ -146,6 +147,7 @@ void systemInit(void)
   ledseqInit();
   pmInit();
   buzzerInit();
+  crashManagerInit();
 //  peerLocalizationInit();
 
 #ifdef APP_ENABLED

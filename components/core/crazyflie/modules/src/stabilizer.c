@@ -38,6 +38,7 @@
 #include "pm_esplane.h"
 #include "esp_timer.h"
 #include "stabilizer.h"
+#include "crash_manager.h"
 #include "sensors.h"
 #include "commander.h"
 #include "crtp_localization_service.h"
@@ -303,10 +304,12 @@ static void stabilizerTask(void* param)
 
       controller(&control, &setpoint, &sensorData, &state, tick);
 
+      crashManagerUpdate(&sensorData, &state);
+
       checkEmergencyStopTimeout();
 
       checkStops = systemIsArmed();
-      if (emergencyStop || (systemIsArmed() == false)) {
+      if (emergencyStop || (systemIsArmed() == false) || !crashManagerIsSafeToFly()) {
         powerStop();
       } else {
         powerDistribution(&control);
@@ -340,6 +343,11 @@ void stabilizerSetEmergencyStop()
 void stabilizerResetEmergencyStop()
 {
   emergencyStop = false;
+}
+
+bool stabilizerIsEmergencyStop()
+{
+  return emergencyStop;
 }
 
 void stabilizerSetEmergencyStopTimeout(int timeout)
